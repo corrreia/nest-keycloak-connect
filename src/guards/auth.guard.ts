@@ -155,6 +155,8 @@ export class AuthGuard implements CanActivate {
   }
 
   private extractJwt(headers: { [key: string]: string }) {
+    this.logger.verbose(`Trying to extract JWT from headers`);
+
     if (headers && !headers.authorization) {
       this.logger.verbose(`No authorization header`);
       return null;
@@ -172,8 +174,17 @@ export class AuthGuard implements CanActivate {
   }
 
   private extractJwtFromCookie(cookies: { [key: string]: string }) {
-    const cookieKey = this.keycloakOpts.cookieKey || KEYCLOAK_COOKIE_DEFAULT;
+    this.logger.verbose(`Trying to extract JWT from cookies`);
 
-    return cookies && cookies[cookieKey];
+    const cookieKey = this.keycloakOpts.cookieKey || KEYCLOAK_COOKIE_DEFAULT;
+    this.logger.verbose(`Using ${cookieKey} as cookie key`);
+
+    const auth = cookies && cookies[cookieKey];
+    if (auth === undefined || auth === null) {
+      this.logger.verbose(`No authorization header`);
+      return null;
+    }
+
+    return auth;
   }
 }
